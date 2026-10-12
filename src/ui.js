@@ -72,18 +72,18 @@ export class UIManager {
         const iconOffset = (cat.iconIndex || 0) * 20;
 
         catRow.innerHTML = `
-          <div class="category-left">
+          <div class="category-row-top">
             <input type="checkbox" class="cat-checkbox" ${isActive ? 'checked' : ''} aria-label="Afficher ${cat.title}">
             <span class="cat-sprite-icon" style="background-position: 0px -${iconOffset}px;"></span>
             <span class="cat-title" title="${cat.title} (Cliquer pour centrer)">${cat.title}</span>
           </div>
-          <div class="category-right">
-            <span class="cat-progress-pill" id="cat-progress-${cat.id}">
-              <span class="done">0</span> / ${cat.count || cat.totalCount || 0}
-            </span>
+          <div class="category-row-bottom">
             <div class="cat-mini-bar">
               <div class="cat-mini-bar-fill" id="cat-bar-${cat.id}" style="width: 0%"></div>
             </div>
+            <span class="cat-progress-pill" id="cat-progress-${cat.id}">
+              <span class="done">0</span> / ${cat.count || cat.totalCount || 0}
+            </span>
           </div>
         `;
 
@@ -120,7 +120,41 @@ export class UIManager {
         body.appendChild(catRow);
       }
 
+      // Group Batch Actions (Tout afficher / Tout masquer pour ce groupe)
+      const groupActions = document.createElement('div');
+      groupActions.className = 'group-batch-actions';
+      groupActions.innerHTML = `
+        <button type="button" class="btn-subtle group-btn-show">Tout afficher</button>
+        <span class="sep">•</span>
+        <button type="button" class="btn-subtle group-btn-hide">Tout masquer</button>
+      `;
+
+      groupActions.querySelector('.group-btn-show').addEventListener('click', (e) => {
+        e.stopPropagation();
+        for (const cat of group.categories) {
+          state.setCategoryActive(cat.id, true);
+        }
+        groupEl.querySelectorAll('.category-item').forEach(item => {
+          item.classList.remove('disabled');
+          const cb = item.querySelector('.cat-checkbox');
+          if (cb) cb.checked = true;
+        });
+      });
+
+      groupActions.querySelector('.group-btn-hide').addEventListener('click', (e) => {
+        e.stopPropagation();
+        for (const cat of group.categories) {
+          state.setCategoryActive(cat.id, false);
+        }
+        groupEl.querySelectorAll('.category-item').forEach(item => {
+          item.classList.add('disabled');
+          const cb = item.querySelector('.cat-checkbox');
+          if (cb) cb.checked = false;
+        });
+      });
+
       groupEl.appendChild(header);
+      groupEl.appendChild(groupActions);
       groupEl.appendChild(body);
       container.appendChild(groupEl);
     }
@@ -173,12 +207,25 @@ export class UIManager {
   // Header & Controls
   // =========================================================================
   setupHeaderControls() {
-    // Mobile sidebar toggle
+    // Sidebar toggle (Desktop & Mobile)
     const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
     const sidebar = document.getElementById('sidebar');
     if (toggleSidebarBtn && sidebar) {
       toggleSidebarBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          sidebar.classList.toggle('mobile-open');
+        } else {
+          const isCollapsed = sidebar.classList.toggle('collapsed');
+          toggleSidebarBtn.classList.toggle('active', isCollapsed);
+          setTimeout(() => {
+            this.mapInstance?.map?.resize();
+          }, 300);
+        }
+      });
+
+      sidebar.addEventListener('transitionend', () => {
+        this.mapInstance?.map?.resize();
       });
     }
 
@@ -240,7 +287,15 @@ export class UIManager {
       this.showToast('Progression réinitialisée.', 'success');
     });
 
-    // Recenter & Fullscreen buttons
+    // Map HUD Controls: Zoom in/out, Recenter & Fullscreen
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
+      this.mapInstance.map?.zoomIn();
+    });
+
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
+      this.mapInstance.map?.zoomOut();
+    });
+
     document.getElementById('btn-recenter')?.addEventListener('click', () => {
       this.mapInstance.resetView();
     });
@@ -311,8 +366,10 @@ export class UIManager {
 
     document.getElementById('btn-collapse-all')?.addEventListener('click', () => {
       const sections = document.querySelectorAll('.group-section');
-      const shouldCollapse = !sections[0]?.classList.contains('collapsed');
-      sections.forEach(s => s.classList.toggle('collapsed', shouldCollapse));
+      const btn = document.getElementById('btn-collapse-all');
+      const isAnyOpen = Array.from(sections).some(s => !s.classList.contains('collapsed'));
+      sections.forEach(s => s.classList.toggle('collapsed', isAnyOpen));
+      if (btn) btn.textContent = isAnyOpen ? 'Déplier' : 'Replier';
     });
   }
 
@@ -349,6 +406,27 @@ export class UIManager {
             : `<span>MARQUER COMME RÉCUPÉRÉ</span>`;
         }
       }
+    });
+
+    // Close detail-flyout when clicking anywhere outside
+    document.addEventListener('pointerdown', (e) => {
+      if (!flyout.classList.contains('open')) return;
+
+      // Don't close if click happened within the flyout itself
+      if (flyout.contains(e.target)) return;
+
+      // Don't close if click was on a modal or dropdown
+      if (e.target.closest('.modal-backdrop') || e.target.closest('.dropdown-wrap')) return;
+
+      // Don't close if click was on a category row (which selects that location)
+      if (e.target.closest('.category-item')) return;
+
+      // Don't close if click was on map canvas - MapLibre's click listener determines marker hit vs background
+      if (e.target.closest('#map')) return;
+
+      // Close the flyout
+      flyout.classList.remove('open');
+      state.setSelectedLocation(null);
     });
   }
 
@@ -511,6 +589,12 @@ export class UIManager {
       if (e.key === '/') {
         e.preventDefault();
         document.getElementById('filter-search-input')?.focus();
+      }
+
+      // '[' or 'Ctrl+B' -> Toggle sidebar
+      if (e.key === '[' || (e.ctrlKey && (e.key === 'b' || e.key === 'B'))) {
+        e.preventDefault();
+        document.getElementById('toggle-sidebar-btn')?.click();
       }
 
       // 'Escape' -> Close flyouts / modals

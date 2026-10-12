@@ -52,9 +52,6 @@ export class SatisfactoryMap {
           attributionControl: false
         });
 
-        // Add Navigation controls (zoom in/out)
-        this.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-
         // Load sprite sheet image
         await this.loadSpriteSheet('/icons.png');
 
@@ -438,6 +435,7 @@ export class SatisfactoryMap {
     // Click on location
     this.map.on('click', 'locations-layer', (e) => {
       if (!e.features || e.features.length === 0) return;
+      window._lastMarkerClickTime = Date.now();
       const feature = e.features[0];
       const locId = feature.properties.id;
       const originalLoc = this.mapData.locations.find(l => l.id === Number(locId));
@@ -457,6 +455,7 @@ export class SatisfactoryMap {
     // Click on custom pin
     this.map.on('click', 'custom-pins-layer', (e) => {
       if (!e.features || e.features.length === 0) return;
+      window._lastMarkerClickTime = Date.now();
       const pinId = e.features[0].properties.id;
       const pin = state.customPins.find(p => p.id === pinId);
       if (pin) {
@@ -471,6 +470,17 @@ export class SatisfactoryMap {
           lng: pin.lng,
           isCustom: true
         });
+      }
+    });
+
+    // Click on map empty background closes open detail flyout
+    this.map.on('click', (e) => {
+      const activeLayers = ['locations-layer', 'custom-pins-layer'].filter(l => this.map.getLayer(l));
+      const features = activeLayers.length > 0 ? this.map.queryRenderedFeatures(e.point, { layers: activeLayers }) : [];
+      if (!features || features.length === 0) {
+        if (state.selectedLocation) {
+          state.setSelectedLocation(null);
+        }
       }
     });
 

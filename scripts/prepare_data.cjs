@@ -25,24 +25,31 @@ while ((m = iconRegex.exec(iconsCss)) !== null) {
 console.log('Parsed icon offsets count:', Object.keys(iconOffsets).length);
 
 // Extract categories and groups
-const groups = mapDataRaw.groups.map(g => ({
-  id: g.id,
-  title: g.title,
-  order: g.order,
-  color: g.color.startsWith('#') ? g.color : `#${g.color}`,
-  categories: g.categories.map(c => {
-    const offset = iconOffsets[c.icon] !== undefined ? iconOffsets[c.icon] : 0;
-    return {
-      id: c.id,
-      groupId: g.id,
-      title: c.title,
-      icon: c.icon,
-      iconOffset: offset,
-      iconIndex: Math.round(offset / 18),
-      totalCount: c.locations_count
-    };
-  })
-}));
+const groups = mapDataRaw.groups.map(g => {
+  let color = g.color.startsWith('#') ? g.color : `#${g.color}`;
+  // User request: Change normal resources color to orange instead of dark blue
+  if (g.title === 'Resources: Normal' || g.id === 2564) {
+    color = '#FF9800';
+  }
+  return {
+    id: g.id,
+    title: g.title,
+    order: g.order,
+    color,
+    categories: g.categories.map(c => {
+      const offset = iconOffsets[c.icon] !== undefined ? iconOffsets[c.icon] : 0;
+      return {
+        id: c.id,
+        groupId: g.id,
+        title: c.title,
+        icon: c.icon,
+        iconOffset: offset,
+        iconIndex: Math.round(offset / 18),
+        totalCount: c.locations_count
+      };
+    })
+  };
+});
 
 const categoriesById = {};
 groups.forEach(g => {

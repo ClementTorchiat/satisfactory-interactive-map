@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Map Drop Shadow -->
+    <filter id="mapShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#000000" flood-opacity="0.8"/>
+    </filter>
+
+    <!-- S Emblem Multi-Layer Shadow & Glow -->
+    <filter id="emblemShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#000000" flood-opacity="0.95"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="16" flood-color="#fa7b17" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Waypoint Beacon Glow -->
+    <filter id="beaconGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Panel Gradients (FICSIT Tactical Slate Theme) -->
+    <linearGradient id="panelLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#192638"/>
+      <stop offset="100%" stop-color="#0e1724"/>
+    </linearGradient>
+
+    <linearGradient id="panelCenter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#213148"/>
+      <stop offset="100%" stop-color="#121c29"/>
+    </linearGradient>
+
+    <linearGradient id="panelRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#172435"/>
+      <stop offset="100%" stop-color="#0d1520"/>
+    </linearGradient>
+
+    <!-- FICSIT Safety Orange Gradient for Satisfactory S -->
+    <linearGradient id="sOrangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFBD59"/>
+      <stop offset="28%" stop-color="#FA851D"/>
+      <stop offset="80%" stop-color="#E85D00"/>
+      <stop offset="100%" stop-color="#BA4300"/>
+    </linearGradient>
+
+    <!-- Topographic Map Clipping Mask -->
+    <clipPath id="mapClip">
+      <polygon points="40,92 184,46 328,92 472,46 472,418 328,464 184,418 40,464"/>
+    </clipPath>
+  </defs>
+
+  <!-- ================= FOLDED MAP BASE ================= -->
+  <g filter="url(#mapShadow)">
+    <!-- Base Shape with Rounded Joins and FICSIT Industrial Border -->
+    <polygon points="40,92 184,46 328,92 472,46 472,418 328,464 184,418 40,464"
+             fill="#0a0f16" stroke="#2b3d54" stroke-width="8" stroke-linejoin="round"/>
+
+    <!-- Left Panel (Angled) -->
+    <polygon points="40,92 184,46 184,418 40,464" fill="url(#panelLeft)" stroke="#223042" stroke-width="1.5"/>
+
+    <!-- Center Panel (Inner fold) -->
+    <polygon points="184,46 328,92 328,464 184,418" fill="url(#panelCenter)" stroke="#223042" stroke-width="1.5"/>
+
+    <!-- Right Panel (Angled) -->
+    <polygon points="328,92 472,46 472,418 328,464" fill="url(#panelRight)" stroke="#223042" stroke-width="1.5"/>
+  </g>
+
+  <!-- ================= TOPOGRAPHIC CONTOURS & HUD GRID ================= -->
+  <g clip-path="url(#mapClip)" opacity="0.92">
+    <!-- Tactical Map Grid Lines -->
+    <line x1="30" y1="160" x2="480" y2="160" stroke="#00e5ff" stroke-width="1" stroke-dasharray="4 8" opacity="0.25"/>
+    <line x1="30" y1="250" x2="480" y2="250" stroke="#00e5ff" stroke-width="1" stroke-dasharray="4 8" opacity="0.25"/>
+    <line x1="30" y1="340" x2="480" y2="340" stroke="#00e5ff" stroke-width="1" stroke-dasharray="4 8" opacity="0.25"/>
+
+    <line x1="112" y1="30" x2="112" y2="480" stroke="#00e5ff" stroke-width="1" stroke-dasharray="4 8" opacity="0.2"/>
+    <line x1="256" y1="30" x2="256" y2="480" stroke="#00e5ff" stroke-width="1" stroke-dasharray="4 8" opacity="0.2"/>
+    <line x1="400" y1="30" x2="400" y2="480" stroke="#00e5ff" stroke-width="1" stroke-dasharray="4 8" opacity="0.2"/>
+
+    <!-- Topographic Elevation Isolines (Vibrant Cyan / Teal) -->
+    <!-- North Mountain Ridge -->
+    <path d="M 20,120 Q 110,95 184,140 T 328,110 T 490,155" fill="none" stroke="#00e5ff" stroke-width="2.5" opacity="0.48"/>
+    <path d="M 20,150 Q 120,125 184,170 T 318,150 T 490,185" fill="none" stroke="#00e5ff" stroke-width="1.8" opacity="0.35"/>
+    <path d="M 30,190 Q 130,175 190,210 T 338,180 T 490,225" fill="none" stroke="#00e5ff" stroke-width="1.3" opacity="0.25"/>
+
+    <!-- South Valley / Biome Ridges -->
+    <path d="M 20,290 Q 100,325 184,295 T 328,340 T 490,305" fill="none" stroke="#00e5ff" stroke-width="1.8" opacity="0.35"/>
+    <path d="M 20,340 Q 120,385 184,340 T 328,385 T 490,360" fill="none" stroke="#00e5ff" stroke-width="2.5" opacity="0.48"/>
+    <path d="M 30,395 Q 110,420 184,385 T 338,430 T 490,405" fill="none" stroke="#00e5ff" stroke-width="1.3" opacity="0.25"/>
+
+    <!-- Radar Pulse Waves around Waypoint Beacon -->
+    <circle cx="390" cy="160" r="28" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.5"/>
+    <circle cx="390" cy="160" r="52" fill="none" stroke="#00e5ff" stroke-width="1.2" opacity="0.32"/>
+    <circle cx="390" cy="160" r="80" fill="none" stroke="#00e5ff" stroke-width="0.9" opacity="0.2"/>
+
+    <!-- Tactical Crosshairs -->
+    <g stroke="#00e5ff" stroke-width="1.5" opacity="0.55">
+      <line x1="107" y1="125" x2="117" y2="125"/><line x1="112" y1="120" x2="112" y2="130"/>
+      <line x1="395" y1="375" x2="405" y2="375"/><line x1="400" y1="370" x2="400" y2="380"/>
+    </g>
+
+    <!-- FICSIT Safety Hazard Stripes on Top-Left Edge -->
+    <g transform="translate(40, 92) rotate(-17)">
+      <rect x="0" y="0" width="50" height="13" fill="#111" rx="2"/>
+      <path d="M 0,0 L 9,13 M 11,0 L 20,13 M 22,0 L 31,13 M 33,0 L 42,13" stroke="#fa7b17" stroke-width="4.5"/>
+    </g>
+  </g>
+
+  <!-- ================= FOLD CREASE LIGHTING ================= -->
+  <!-- Valley Fold 1 (x=184) -->
+  <line x1="184" y1="46" x2="184" y2="418" stroke="#05080c" stroke-width="4.5" opacity="0.9"/>
+  <line x1="185.5" y1="46" x2="185.5" y2="418" stroke="#3b5069" stroke-width="1.5" opacity="0.65"/>
+
+  <!-- Mountain Fold 2 (x=328) -->
+  <line x1="328" y1="92" x2="328" y2="464" stroke="#05080c" stroke-width="4.5" opacity="0.9"/>
+  <line x1="327" y1="92" x2="327" y2="464" stroke="#3b5069" stroke-width="1.5" opacity="0.65"/>
+
+  <!-- Glowing Map Rim for Dark Theme Tab Contrast -->
+  <polygon points="40,92 184,46 328,92 472,46 472,418 328,464 184,418 40,464"
+           fill="none" stroke="#00e5ff" stroke-width="1.2" stroke-opacity="0.3" stroke-linejoin="round"/>
+
+  <!-- ================= SATISFACTORY 'S' FOREGROUND ================= -->
+  <g filter="url(#emblemShadow)">
+    <!-- Heavy Industrial Charcoal Stroke for 100% High Contrast Separation -->
+    <path d="M 338.22,400.0 L 173.15,399.37 L 173.78,295.36 L 236.88,295.64 L 237.62,334.86 L 274.29,334.86 L 273.71,284.35 L 230.7,284.07 L 210.46,279.58 L 200.34,274.4 L 188.96,265.0 L 182.26,256.43 L 175.9,242.51 L 173.2,227.33 L 173.51,143.85 L 177.26,131.19 L 182.46,122.34 L 191.49,113.15 L 200.34,107.93 L 216.79,104.03 L 299.0,104.36 L 311.66,108.13 L 320.51,113.35 L 329.64,122.34 L 334.88,131.19 L 338.74,147.65 L 338.22,208.51 L 274.97,208.41 L 274.29,169.14 L 238.29,168.49 L 237.52,218.47 L 239.56,219.81 L 282.56,219.99 L 299.0,223.16 L 316.71,233.07 L 324.83,241.25 L 330.83,250.1 L 336.14,262.75 L 338.69,276.67 L 338.22,400.0 Z"
+          fill="none" stroke="#070a0e" stroke-width="18" stroke-linejoin="miter" stroke-miterlimit="4"/>
+
+    <!-- High-Luminance Orange Accent Rim -->
+    <path d="M 338.22,400.0 L 173.15,399.37 L 173.78,295.36 L 236.88,295.64 L 237.62,334.86 L 274.29,334.86 L 273.71,284.35 L 230.7,284.07 L 210.46,279.58 L 200.34,274.4 L 188.96,265.0 L 182.26,256.43 L 175.9,242.51 L 173.2,227.33 L 173.51,143.85 L 177.26,131.19 L 182.46,122.34 L 191.49,113.15 L 200.34,107.93 L 216.79,104.03 L 299.0,104.36 L 311.66,108.13 L 320.51,113.35 L 329.64,122.34 L 334.88,131.19 L 338.74,147.65 L 338.22,208.51 L 274.97,208.41 L 274.29,169.14 L 238.29,168.49 L 237.52,218.47 L 239.56,219.81 L 282.56,219.99 L 299.0,223.16 L 316.71,233.07 L 324.83,241.25 L 330.83,250.1 L 336.14,262.75 L 338.69,276.67 L 338.22,400.0 Z"
+          fill="none" stroke="#ffa640" stroke-width="4" stroke-opacity="0.85" stroke-linejoin="miter"/>
+
+    <!-- Solid FICSIT Orange Core Fill -->
+    <path d="M 338.22,400.0 L 173.15,399.37 L 173.78,295.36 L 236.88,295.64 L 237.62,334.86 L 274.29,334.86 L 273.71,284.35 L 230.7,284.07 L 210.46,279.58 L 200.34,274.4 L 188.96,265.0 L 182.26,256.43 L 175.9,242.51 L 173.2,227.33 L 173.51,143.85 L 177.26,131.19 L 182.46,122.34 L 191.49,113.15 L 200.34,107.93 L 216.79,104.03 L 299.0,104.36 L 311.66,108.13 L 320.51,113.35 L 329.64,122.34 L 334.88,131.19 L 338.74,147.65 L 338.22,208.51 L 274.97,208.41 L 274.29,169.14 L 238.29,168.49 L 237.52,218.47 L 239.56,219.81 L 282.56,219.99 L 299.0,223.16 L 316.71,233.07 L 324.83,241.25 L 330.83,250.1 L 336.14,262.75 L 338.69,276.67 L 338.22,400.0 Z"
+          fill="url(#sOrangeGrad)"/>
+
+    <!-- Subtle Top-Left Industrial Specular Chamfer Highlight -->
+    <path d="M 338.22,400.0 L 173.15,399.37 L 173.78,295.36 L 236.88,295.64 L 237.62,334.86 L 274.29,334.86 L 273.71,284.35 L 230.7,284.07 L 210.46,279.58 L 200.34,274.4 L 188.96,265.0 L 182.26,256.43 L 175.9,242.51 L 173.2,227.33 L 173.51,143.85 L 177.26,131.19 L 182.46,122.34 L 191.49,113.15 L 200.34,107.93 L 216.79,104.03 L 299.0,104.36 L 311.66,108.13 L 320.51,113.35 L 329.64,122.34 L 334.88,131.19 L 338.74,147.65 L 338.22,208.51 L 274.97,208.41 L 274.29,169.14 L 238.29,168.49 L 237.52,218.47 L 239.56,219.81 L 282.56,219.99 L 299.0,223.16 L 316.71,233.07 L 324.83,241.25 L 330.83,250.1 L 336.14,262.75 L 338.69,276.67 L 338.22,400.0 Z"
+          fill="none" stroke="#ffffff" stroke-width="2.5" stroke-opacity="0.45" stroke-dasharray="90 180"/>
+  </g>
+
+  <!-- ================= MAP BEACON PIN (WAYPOINT MARKER) ================= -->
+  <g transform="translate(390, 160)" filter="url(#beaconGlow)">
+    <circle cx="0" cy="0" r="15" fill="none" stroke="#00e5ff" stroke-width="2.2" opacity="0.9"/>
+    <polygon points="0,-10 8,0 0,10 -8,0" fill="#00e5ff"/>
+    <circle cx="0" cy="0" r="3.5" fill="#ffffff"/>
+  </g>
+</svg>
