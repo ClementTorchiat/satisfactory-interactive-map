@@ -4,7 +4,9 @@ import { UIManager } from './ui.js';
 
 async function bootstrap() {
   try {
-    const response = await fetch('/data/map-data.json');
+    const baseUrl = import.meta.env.BASE_URL || './';
+    const dataUrl = baseUrl.endsWith('/') ? `${baseUrl}data/map-data.json` : `${baseUrl}/data/map-data.json`;
+    const response = await fetch(dataUrl);
     if (!response.ok) {
       throw new Error(`Erreur HTTP: ${response.status} lors du chargement des données`);
     }

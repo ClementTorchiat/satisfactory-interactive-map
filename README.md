@@ -29,11 +29,12 @@ Une réplique **100% fidèle et sans restriction** de la carte interactive Satis
 
 ## ⌨️ Raccourcis Clavier
 
+- `[` ou `Ctrl+B` : Afficher / Masquer la barre latérale.
 - `F` ou `Espace` : Marquer / Démarquer l'objet sélectionné comme récupéré.
 - `/` : Activer la barre de recherche.
 - `Échap` : Fermer le panneau de détail ou les fenêtres modales.
 
-## 🚀 Démarrage
+## 🚀 Démarrage en local
 
 ```bash
 # Lancer le serveur local
@@ -42,3 +43,19 @@ npm run dev
 # Ouvrir dans votre navigateur
 http://localhost:5173
 ```
+
+## 🌐 Déploiement sur GitHub Pages
+
+Le projet inclut une configuration prête pour GitHub Pages avec un workflow automatique (`.github/workflows/deploy.yml`) :
+
+1. Poussez votre code sur GitHub :
+   ```bash
+   git add .
+   git commit -m "feat: complete satisfactory interactive map"
+   git push origin main
+   ```
+2. Sur votre dépôt GitHub :
+   - Allez dans **Settings** > **Pages**
+   - Sous **Build and deployment > Source**, sélectionnez **GitHub Actions**
+3. C'est tout ! À chaque `git push`, le site est automatiquement compilé et déployé à l'adresse :
+   `https://clementtorchiat.github.io/mapgenie-outpass/`

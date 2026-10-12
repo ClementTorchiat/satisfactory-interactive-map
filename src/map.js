@@ -53,7 +53,9 @@ export class SatisfactoryMap {
         });
 
         // Load sprite sheet image
-        await this.loadSpriteSheet('/icons.png');
+        const baseUrl = import.meta.env.BASE_URL || './';
+        const iconUrl = baseUrl.endsWith('/') ? `${baseUrl}icons.png` : `${baseUrl}/icons.png`;
+        await this.loadSpriteSheet(iconUrl);
 
         this.map.on('load', () => {
           this.isLoaded = true;
