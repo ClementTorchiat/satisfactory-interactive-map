@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Satisfactory Interactive Map | FICSIT Pioneer Edition</title>
+  <meta name="description" content="Map interactive complète pour Satisfactory - MASSAGE-2(A-B)b. Suivi et marquage illimité de disques durs, limaces, sphères de Mercer, somersloops, gisements purs/normaux/impurs.">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/icons.png">
+
+  <!-- Google Fonts: Rajdhani & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body class="ficsit-theme">
+  <div id="app" class="app-layout">
+    <!-- Top Navigation & Stats Bar -->
+    <header class="app-header">
+      <div class="header-brand">
+        <button id="toggle-sidebar-btn" class="icon-btn mobile-menu-btn" aria-label="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="brand-badge">FICSIT</div>
+        <div class="brand-titles">
+          <h1 class="brand-title">SATISFACTORY MAP</h1>
+          <span class="brand-sub">MASSAGE-2(A-B)b • P.I.O.N.E.E.R. TRACKER</span>
+        </div>
+      </div>
+
+      <!-- Overall Tracker Widget -->
+      <div class="header-tracker" id="header-tracker">
+        <div class="tracker-info">
+          <span class="tracker-label">PROGRESSION GLOBALE</span>
+          <span class="tracker-stats"><strong id="total-found-count">0</strong> / <span id="total-locations-count">2509</span> (<span id="total-found-percent">0.0%</span>)</span>
+        </div>
+        <div class="tracker-bar-wrap">
+          <div class="tracker-bar-fill" id="global-progress-bar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Controls -->
+      <div class="header-controls">
+        <label class="toggle-pill" title="Masquer de la carte les objets déjà récupérés">
+          <input type="checkbox" id="toggle-hide-collected">
+          <span class="toggle-pill-track">
+            <span class="toggle-pill-thumb"></span>
+          </span>
+          <span class="toggle-pill-text">Masquer récupérés</span>
+        </label>
+
+        <button id="btn-custom-pin" class="btn btn-secondary btn-sm" title="Ajouter une balise ou note personnelle sur la carte">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 7.2c0 7.3-8 11.8-8 11.8z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <span class="btn-text">+ Balise</span>
+        </button>
+
+        <div class="dropdown-wrap">
+          <button id="btn-backup-menu" class="btn btn-secondary btn-sm" aria-haspopup="true" title="Sauvegarde, Export et Import de vos données">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            <span class="btn-text">Sauvegarde</span>
+          </button>
+          <div class="dropdown-menu" id="backup-dropdown">
+            <button class="dropdown-item" id="btn-export-data">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Exporter ma progression (JSON)
+            </button>
+            <button class="dropdown-item" id="btn-import-trigger">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Importer une sauvegarde (JSON)
+            </button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item text-danger" id="btn-reset-data">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Réinitialiser ma progression
+            </button>
+          </div>
+          <input type="file" id="file-import-input" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace-wrap">
+      <!-- Left Sidebar (Filters, Categories, Search) -->
+      <aside class="sidebar-panel" id="sidebar">
+        <!-- Sidebar Search -->
+        <div class="sidebar-search-box">
+          <div class="search-input-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="filter-search-input" placeholder="Rechercher (ex: Crash Site, 40 MW, Soufre, Rotor...)" autocomplete="off">
+            <button id="clear-search-btn" class="clear-btn" aria-label="Effacer recherche" style="display: none;">&times;</button>
+          </div>
+        </div>
+
+        <!-- Quick Filter Chips -->
+        <div class="quick-chips-bar" id="quick-chips">
+          <button class="chip-btn active" data-group="all">Tous</button>
+          <button class="chip-btn" data-group="Collectibles">Objets</button>
+          <button class="chip-btn" data-group="Power Slugs">Limaces</button>
+          <button class="chip-btn" data-group="Resources: Pure">Purs</button>
+          <button class="chip-btn" data-group="Resources: Normal">Normaux</button>
+          <button class="chip-btn" data-group="Resources: Impure">Impurs</button>
+          <button class="chip-btn" data-group="Locations">Grottes</button>
+        </div>
+
+        <!-- Global Batch Actions -->
+        <div class="sidebar-batch-actions">
+          <button id="btn-show-all-cats" class="btn-subtle">Tout afficher</button>
+          <span class="sep">•</span>
+          <button id="btn-hide-all-cats" class="btn-subtle">Tout masquer</button>
+          <span class="sep">•</span>
+          <button id="btn-collapse-all" class="btn-subtle">Replier</button>
+        </div>
+
+        <!-- Accordion of Category Groups -->
+        <div class="categories-tree" id="categories-tree">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <span>Chargement des données FICSIT...</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Map Viewport -->
+      <main class="map-viewport">
+        <div id="map" class="map-canvas-container"></div>
+
+        <!-- Map Overlays / HUD -->
+        <div class="map-hud-top-right">
+          <button id="btn-recenter" class="hud-btn" title="Recentrer sur la carte">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line></svg>
+          </button>
+          <button id="btn-fullscreen" class="hud-btn" title="Plein écran">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+          </button>
+        </div>
+
+        <!-- Map Bottom Bar HUD -->
+        <div class="map-hud-bottom">
+          <div class="hud-badge">
+            <span class="hud-label">ZONE:</span>
+            <span class="hud-val">MASSAGE-2(A-B)b</span>
+          </div>
+          <div class="hud-badge" id="hud-coords">
+            <span class="hud-label">LAT:</span>
+            <span class="hud-val" id="hud-lat">0.658</span>
+            <span class="hud-label">LNG:</span>
+            <span class="hud-val" id="hud-lng">-0.824</span>
+          </div>
+          <div class="hud-badge">
+            <span class="hud-label">ZOOM:</span>
+            <span class="hud-val" id="hud-zoom">11.5</span>
+          </div>
+          <div class="hud-badge hud-visible-count">
+            <span class="hud-label">VISIBLES:</span>
+            <span class="hud-val" id="hud-visible-count">2509</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- Location Details Flyout / Floating Card -->
+      <aside class="detail-flyout" id="detail-flyout">
+        <button class="flyout-close-btn" id="flyout-close-btn" aria-label="Fermer le panneau">&times;</button>
+        <div class="flyout-content" id="flyout-content">
+          <!-- Dynamically populated by UI -->
+        </div>
+      </aside>
+    </div>
+
+    <!-- Custom Pin Creation Modal -->
+    <div class="modal-backdrop" id="modal-custom-pin" style="display: none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 class="modal-title">Ajouter une balise personnelle</h2>
+          <button class="modal-close-btn" data-close-modal>&times;</button>
+        </div>
+        <form id="custom-pin-form">
+          <div class="form-group">
+            <label for="pin-title">Nom de la balise</label>
+            <input type="text" id="pin-title" placeholder="ex: Usine d'Aluminium, Gare Nord, Hub Principal" required>
+          </div>
+          <div class="form-group">
+            <label for="pin-type">Type de balise</label>
+            <select id="pin-type">
+              <option value="factory">🏭 Usine / Production</option>
+              <option value="hub">🚀 Hub / QG</option>
+              <option value="train">🚂 Train / Gare</option>
+              <option value="beacon">🚩 Point de repère / Balise</option>
+              <option value="danger">⚠️ Danger / Faune hostile</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pin-notes">Notes / Détails</label>
+            <textarea id="pin-notes" rows="3" placeholder="Informations utiles, cadence de production, code d'accès..."></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+            <button type="submit" class="btn btn-primary">Créer la balise au centre</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div class="modal-backdrop" id="modal-lightbox" style="display: none;">
+      <div class="lightbox-box">
+        <button class="lightbox-close-btn" id="lightbox-close-btn">&times;</button>
+        <img id="lightbox-img" src="" alt="Capture Satisfactory">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+      </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="modal-backdrop" id="modal-confirm-reset" style="display: none;">
+      <div class="modal-box modal-danger">
+        <div class="modal-header">
+          <h2 class="modal-title">Réinitialiser la progression ?</h2>
+          <button class="modal-close-btn" data-close-modal>&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>Êtes-vous sûr de vouloir réinitialiser l'ensemble de votre suivi ? Tous les objets marqués comme récupérés seront décochés.</p>
+          <p class="text-warning">Astuce : Vous pouvez d'abord faire un <strong>Export JSON</strong> pour conserver une sauvegarde de sécurité.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+          <button type="button" class="btn btn-danger" id="confirm-reset-btn">Oui, tout réinitialiser</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+
+  <!-- Main JavaScript Bundle -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
