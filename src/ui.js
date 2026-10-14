@@ -430,10 +430,271 @@ export class UIManager {
     });
   }
 
+  getResourceYieldData(loc) {
+    const catTitle = loc.categoryTitle || '';
+    const groupTitle = loc.groupTitle || '';
+    let purity = null;
+
+    if (groupTitle.includes('Pure') || catTitle.endsWith('(P)')) purity = 'pure';
+    else if (groupTitle.includes('Normal') || catTitle.endsWith('(N)')) purity = 'normal';
+    else if (groupTitle.includes('Impure') || catTitle.endsWith('(I)')) purity = 'impure';
+
+    if (!purity) return null;
+
+    if (catTitle.startsWith('Geyser')) {
+      const powerMap = {
+        impure: { min: 50, max: 150, avg: 100 },
+        normal: { min: 100, max: 300, avg: 200 },
+        pure: { min: 200, max: 600, avg: 400 }
+      };
+      return {
+        type: 'geyser',
+        purity,
+        power: powerMap[purity]
+      };
+    }
+
+    if (catTitle.startsWith('Crude Oil')) {
+      const baseMap = { impure: 60, normal: 120, pure: 240 };
+      const baseRate = baseMap[purity];
+      return {
+        type: 'fluid',
+        fluidType: 'oil',
+        extractorName: 'Extracteur de pétrole',
+        unit: 'm³/min',
+        purity,
+        baseRate,
+        overclockRate: baseRate * 2.5
+      };
+    }
+
+    if (catTitle.startsWith('Water')) {
+      const baseMap = { impure: 30, normal: 60, pure: 120 };
+      const baseRate = baseMap[purity];
+      return {
+        type: 'fluid',
+        fluidType: 'water',
+        extractorName: 'Extracteur de puits (Pressuriseur)',
+        unit: 'm³/min',
+        purity,
+        baseRate,
+        overclockRate: baseRate * 2.5
+      };
+    }
+
+    if (catTitle.startsWith('Nitrogen')) {
+      const baseMap = { impure: 30, normal: 60, pure: 120 };
+      const baseRate = baseMap[purity];
+      return {
+        type: 'fluid',
+        fluidType: 'nitrogen',
+        extractorName: 'Extracteur de puits (Pressuriseur)',
+        unit: 'm³/min',
+        purity,
+        baseRate,
+        overclockRate: baseRate * 2.5
+      };
+    }
+
+    // Solid Minerals (Iron, Copper, Coal, Limestone, Caterium, Quartz, Sulfur, Bauxite, SAM, Uranium)
+    const baseRates = {
+      impure: { mk1: 30, mk2: 60, mk3: 120 },
+      normal: { mk1: 60, mk2: 120, mk3: 240 },
+      pure: { mk1: 120, mk2: 240, mk3: 480 }
+    }[purity];
+
+    return {
+      type: 'solid',
+      purity,
+      tiers: [
+        { name: 'Mk.1', label: 'Foreuse Mk.1', rate100: baseRates.mk1, rate250: baseRates.mk1 * 2.5 },
+        { name: 'Mk.2', label: 'Foreuse Mk.2', rate100: baseRates.mk2, rate250: baseRates.mk2 * 2.5 },
+        { name: 'Mk.3', label: 'Foreuse Mk.3', rate100: baseRates.mk3, rate250: baseRates.mk3 * 2.5 }
+      ]
+    };
+  }
+
+  getRecommendedBelt(rate) {
+    if (rate <= 60) return { name: 'Conv. Mk.1', full: 'Convoyeur Mk.1 (60/min)' };
+    if (rate <= 120) return { name: 'Conv. Mk.2', full: 'Convoyeur Mk.2 (120/min)' };
+    if (rate <= 270) return { name: 'Conv. Mk.3', full: 'Convoyeur Mk.3 (270/min)' };
+    if (rate <= 480) return { name: 'Conv. Mk.4', full: 'Convoyeur Mk.4 (480/min)' };
+    if (rate <= 780) return { name: 'Conv. Mk.5', full: 'Convoyeur Mk.5 (780/min)' };
+    return { name: 'Conv. Mk.6', full: 'Convoyeur Mk.6 (1200/min)' };
+  }
+
+  getRecommendedPipe(rate) {
+    if (rate <= 300) return { name: 'Pipe Mk.1', full: 'Pipeline Mk.1 (300 m³/min)' };
+    return { name: 'Pipe Mk.2', full: 'Pipeline Mk.2 (600 m³/min)' };
+  }
+
+  renderResourceYieldHtml(yieldData) {
+    if (!yieldData) return '';
+
+    const purityLabels = {
+      pure: 'PUR',
+      normal: 'NORMAL',
+      impure: 'IMPUR'
+    };
+    const purityText = purityLabels[yieldData.purity] || yieldData.purity.toUpperCase();
+
+    if (yieldData.type === 'solid') {
+      return `
+        <div class="resource-yield-widget" id="resource-yield-widget" data-overclock="false">
+          <div class="yield-widget-header">
+            <div class="yield-widget-title">
+              <span class="yield-icon">⛏️</span>
+              <span class="yield-label">Rendement d'extraction</span>
+              <span class="yield-purity-pill purity-${yieldData.purity}">${purityText}</span>
+            </div>
+            <button type="button" class="btn-overclock-toggle" id="btn-overclock-toggle" title="Basculer entre cadence 100% et surcadençage 250%">
+              <span class="oc-badge">100%</span>
+              <span class="oc-label">Standard</span>
+            </button>
+          </div>
+
+          <div class="yield-grid">
+            ${yieldData.tiers.map(t => {
+              const belt = this.getRecommendedBelt(t.rate100);
+              return `
+                <div class="yield-card" data-mk="${t.name}">
+                  <div class="yield-card-header">
+                    <span class="yield-mk-badge">${t.name}</span>
+                    <span class="yield-mk-title">${t.label}</span>
+                  </div>
+                  <div class="yield-rate-wrap">
+                    <span class="yield-rate-value" data-rate-100="${t.rate100}" data-rate-250="${t.rate250}">${t.rate100}</span>
+                    <span class="yield-rate-unit">/min</span>
+                  </div>
+                  <div class="yield-belt-recommendation" data-rate-100="${t.rate100}" data-rate-250="${t.rate250}" title="${belt.full}">
+                    <span class="yield-belt-icon">➔</span>
+                    <span class="yield-belt-text">${belt.name}</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (yieldData.type === 'fluid') {
+      const icon = yieldData.fluidType === 'oil' ? '🛢️' : (yieldData.fluidType === 'water' ? '💧' : '💨');
+      const pipe = this.getRecommendedPipe(yieldData.baseRate);
+      return `
+        <div class="resource-yield-widget" id="resource-yield-widget" data-overclock="false">
+          <div class="yield-widget-header">
+            <div class="yield-widget-title">
+              <span class="yield-icon">${icon}</span>
+              <span class="yield-label">Débit d'extraction</span>
+              <span class="yield-purity-pill purity-${yieldData.purity}">${purityText}</span>
+            </div>
+            <button type="button" class="btn-overclock-toggle" id="btn-overclock-toggle" title="Basculer entre cadence 100% et surcadençage 250%">
+              <span class="oc-badge">100%</span>
+              <span class="oc-label">Standard</span>
+            </button>
+          </div>
+
+          <div class="yield-fluid-box">
+            <div class="yield-fluid-main">
+              <div class="yield-fluid-extractor">${yieldData.extractorName}</div>
+              <div class="yield-rate-wrap yield-fluid-rate">
+                <span class="yield-rate-value" data-rate-100="${yieldData.baseRate}" data-rate-250="${yieldData.overclockRate}">${yieldData.baseRate}</span>
+                <span class="yield-rate-unit">${yieldData.unit}</span>
+              </div>
+            </div>
+            <div class="yield-belt-recommendation yield-pipe-rec" data-rate-100="${yieldData.baseRate}" data-rate-250="${yieldData.overclockRate}" title="${pipe.full}">
+              <span class="yield-belt-icon">➔</span>
+              <span class="yield-belt-text">${pipe.name}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (yieldData.type === 'geyser') {
+      return `
+        <div class="resource-yield-widget geyser-widget">
+          <div class="yield-widget-header">
+            <div class="yield-widget-title">
+              <span class="yield-icon">🌋</span>
+              <span class="yield-label">Générateur Géothermique</span>
+              <span class="yield-purity-pill purity-${yieldData.purity}">${purityText}</span>
+            </div>
+            <span class="geyser-badge-clean">ÉNERGIE PROPRE</span>
+          </div>
+
+          <div class="yield-geyser-box">
+            <div class="yield-geyser-avg">
+              <span class="geyser-avg-val">${yieldData.power.avg}</span>
+              <span class="geyser-avg-unit">MW (Moyenne continue)</span>
+            </div>
+            <div class="yield-geyser-range">
+              <span>Oscillation électrique : <strong>${yieldData.power.min} MW</strong> ~ <strong>${yieldData.power.max} MW</strong></span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    return '';
+  }
+
+  setupOverclockToggle() {
+    const btn = document.getElementById('btn-overclock-toggle');
+    const widget = document.getElementById('resource-yield-widget');
+    if (!btn || !widget) return;
+
+    btn.addEventListener('click', () => {
+      const isOC = widget.dataset.overclock === 'true';
+      const newOC = !isOC;
+      widget.dataset.overclock = String(newOC);
+      widget.classList.toggle('overclocked', newOC);
+
+      // Update button label and badge
+      const badge = btn.querySelector('.oc-badge');
+      const label = btn.querySelector('.oc-label');
+      if (badge && label) {
+        badge.textContent = newOC ? '250%' : '100%';
+        label.textContent = newOC ? '3 Éclats ⚡' : 'Standard';
+      }
+
+      // Update rate values
+      widget.querySelectorAll('.yield-rate-value').forEach(el => {
+        const val = newOC ? el.dataset.rate250 : el.dataset.rate100;
+        if (val) {
+          el.textContent = val;
+          el.style.transform = 'scale(1.18)';
+          setTimeout(() => { el.style.transform = ''; }, 160);
+        }
+      });
+
+      // Update conveyor/pipeline recommendations
+      widget.querySelectorAll('.yield-belt-recommendation').forEach(el => {
+        const rate = Number(newOC ? el.dataset.rate250 : el.dataset.rate100);
+        const textEl = el.querySelector('.yield-belt-text');
+        if (textEl) {
+          if (el.classList.contains('yield-pipe-rec')) {
+            const pipe = this.getRecommendedPipe(rate);
+            textEl.textContent = pipe.name;
+            el.title = pipe.full;
+          } else {
+            const belt = this.getRecommendedBelt(rate);
+            textEl.textContent = belt.name;
+            el.title = belt.full;
+          }
+        }
+      });
+    });
+  }
+
   renderDetailContent(loc, container) {
     const isFound = state.isFound(loc.id);
     const cat = this.mapData.categoriesById[loc.categoryId] || {};
     const groupColor = loc.groupColor || cat.groupColor || '#BA8E23';
+
+    const yieldData = this.getResourceYieldData(loc);
+    const yieldHtml = this.renderResourceYieldHtml(yieldData);
 
     let mediaHtml = '';
     if (loc.media && loc.media.length > 0) {
@@ -454,6 +715,8 @@ export class UIManager {
 
       <h2 class="detail-title">${loc.title}</h2>
 
+      ${yieldHtml}
+
       ${loc.description ? `<div class="detail-description">${this.formatDescription(loc.description)}</div>` : ''}
 
       ${mediaHtml}
@@ -470,6 +733,9 @@ export class UIManager {
         <button id="detail-center-btn" class="btn-subtle" style="color: var(--ficsit-cyan)">Recentrer</button>
       </div>
     `;
+
+    // Overclock toggle handler
+    this.setupOverclockToggle();
 
     // Toggle button handler
     document.getElementById('flyout-toggle-found-btn')?.addEventListener('click', () => {

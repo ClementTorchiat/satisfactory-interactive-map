@@ -882,7 +882,8 @@ html, body {
   position: absolute;
   top: 14px;
   right: 64px;
-  width: 380px;
+  width: 400px;
+  max-width: calc(100vw - 80px);
   max-height: calc(100% - 28px);
   background: rgba(18, 24, 34, 0.96);
   border: 1px solid var(--border-medium);
@@ -929,10 +930,10 @@ html, body {
 
 .flyout-content {
   overflow-y: auto;
-  padding: 18px 20px 22px;
+  padding: 16px 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .detail-header-badge {
@@ -971,6 +972,361 @@ html, body {
   padding: 12px 14px;
   border-radius: var(--radius-md);
   border-left: 3px solid var(--ficsit-orange);
+}
+
+/* ==========================================================================
+   Resource Yield & Miner Rates Widget (FICSIT Production Specs)
+   ========================================================================== */
+.resource-yield-widget {
+  background: rgba(14, 20, 30, 0.95);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.resource-yield-widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--ficsit-orange);
+  transition: background 0.25s;
+}
+
+.resource-yield-widget.overclocked {
+  border-color: rgba(0, 229, 255, 0.45);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.12);
+}
+
+.resource-yield-widget.overclocked::before {
+  background: var(--ficsit-cyan);
+}
+
+.yield-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.yield-widget-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.yield-icon {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.yield-label {
+  font-family: var(--font-hud);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.yield-purity-pill {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.yield-purity-pill.purity-pure {
+  background: rgba(41, 175, 52, 0.18);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+.yield-purity-pill.purity-normal {
+  background: rgba(255, 152, 0, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.yield-purity-pill.purity-impure {
+  background: rgba(229, 57, 53, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+/* Overclock Button */
+.btn-overclock-toggle {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: 2px 7px 2px 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.btn-overclock-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--ficsit-orange);
+}
+
+.overclocked .btn-overclock-toggle {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: var(--ficsit-cyan);
+}
+
+.oc-badge {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  background: var(--ficsit-orange);
+  color: #000;
+  padding: 1px 5px;
+  border-radius: var(--radius-full);
+  transition: background 0.2s;
+}
+
+.overclocked .oc-badge {
+  background: var(--ficsit-cyan);
+}
+
+.oc-label {
+  font-family: var(--font-hud);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* 3-Column Solid Minerals Grid */
+.yield-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.yield-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 7px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.yield-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-medium);
+}
+
+.yield-card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: 100%;
+  min-width: 0;
+}
+
+.yield-mk-badge {
+  font-family: var(--font-hud);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--ficsit-orange);
+  letter-spacing: 0.5px;
+}
+
+.overclocked .yield-mk-badge {
+  color: var(--ficsit-cyan);
+}
+
+.yield-mk-title {
+  font-size: 9.5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.yield-rate-wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  margin: 2px 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.yield-rate-value {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  transition: transform 0.15s ease, color 0.2s;
+  white-space: nowrap;
+}
+
+.overclocked .yield-rate-value {
+  color: var(--ficsit-cyan);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.45);
+}
+
+.yield-rate-unit {
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+.yield-belt-recommendation {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 3px;
+  padding: 3px 2px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+
+.yield-belt-icon {
+  color: var(--ficsit-orange);
+  font-size: 8px;
+  flex-shrink: 0;
+}
+
+.overclocked .yield-belt-icon {
+  color: var(--ficsit-cyan);
+}
+
+.yield-belt-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Fluid Box */
+.yield-fluid-box {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.yield-fluid-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.yield-fluid-extractor {
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.yield-fluid-rate .yield-rate-value {
+  font-size: 22px;
+}
+
+/* Geyser Box */
+.yield-geyser-box {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.yield-geyser-avg {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.geyser-avg-val {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 700;
+  color: #4ade80;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+}
+
+.geyser-avg-unit {
+  font-family: var(--font-hud);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.yield-geyser-range {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.yield-geyser-range strong {
+  color: var(--text-main);
+}
+
+.geyser-badge-clean {
+  font-family: var(--font-hud);
+  font-size: 10px;
+  font-weight: 700;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.15);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 3px;
+  padding: 2px 6px;
+  letter-spacing: 0.5px;
 }
 
 .detail-media-wrap {
@@ -1287,7 +1643,8 @@ html, body {
     display: none;
   }
   .detail-flyout {
-    width: 340px;
+    width: 360px;
+    max-width: calc(100vw - 28px);
     right: 14px;
   }
 }
