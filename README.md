@@ -58,4 +58,4 @@ Le projet inclut une configuration prête pour GitHub Pages avec un workflow aut
    - Allez dans **Settings** > **Pages**
    - Sous **Build and deployment > Source**, sélectionnez **GitHub Actions**
 3. C'est tout ! À chaque `git push`, le site est automatiquement compilé et déployé à l'adresse :
-   `https://clementtorchiat.github.io/mapgenie-outpass/`
+   `https://clementtorchiat.github.io/satisfactory-interactive-map/`
