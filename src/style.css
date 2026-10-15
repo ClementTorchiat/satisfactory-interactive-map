@@ -1074,53 +1074,96 @@ html, body {
   border: 1px solid rgba(248, 113, 113, 0.35);
 }
 
-/* Overclock Button */
-.btn-overclock-toggle {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-full);
-  padding: 2px 7px 2px 3px;
+/* 4-Step Overclock Segmented Control */
+.yield-oc-segmented {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: 2px;
+  gap: 2px;
   user-select: none;
   flex-shrink: 0;
 }
 
-.btn-overclock-toggle:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--ficsit-orange);
-}
-
-.overclocked .btn-overclock-toggle {
-  background: rgba(0, 229, 255, 0.12);
-  border-color: var(--ficsit-cyan);
-}
-
-.oc-badge {
+.oc-step-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 2px 6px;
   font-family: var(--font-mono);
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  line-height: 1.2;
+}
+
+.oc-step-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.oc-step-btn.active[data-clock="100"] {
   background: var(--ficsit-orange);
   color: #000;
-  padding: 1px 5px;
-  border-radius: var(--radius-full);
-  transition: background 0.2s;
+  box-shadow: 0 0 8px rgba(250, 123, 23, 0.4);
 }
 
-.overclocked .oc-badge {
+.oc-step-btn.active[data-clock="150"] {
+  background: rgba(0, 229, 255, 0.85);
+  color: #000;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.45);
+}
+
+.oc-step-btn.active[data-clock="200"] {
+  background: #00e5ff;
+  color: #000;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.65);
+}
+
+.oc-step-btn.active[data-clock="250"] {
+  background: linear-gradient(135deg, #00e5ff 0%, #a855f7 100%);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.65);
+}
+
+/* Tiered Widget Appearance */
+.resource-yield-widget[data-tier="150"] {
+  border-color: rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.12);
+}
+.resource-yield-widget[data-tier="150"]::before {
   background: var(--ficsit-cyan);
 }
 
-.oc-label {
-  font-family: var(--font-hud);
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--text-main);
-  letter-spacing: 0.3px;
-  white-space: nowrap;
+.resource-yield-widget[data-tier="200"] {
+  border-color: rgba(0, 229, 255, 0.7);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.2);
+}
+.resource-yield-widget[data-tier="200"]::before {
+  background: #00e5ff;
+}
+
+.resource-yield-widget[data-tier="250"] {
+  border-color: rgba(168, 85, 247, 0.7);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.15), 0 0 14px rgba(168, 85, 247, 0.3);
+}
+.resource-yield-widget[data-tier="250"]::before {
+  background: linear-gradient(to bottom, #00e5ff, #a855f7);
+}
+
+.resource-yield-widget[data-tier="250"] .yield-mk-badge {
+  color: #c084fc;
+}
+.resource-yield-widget[data-tier="250"] .yield-rate-value {
+  color: #e9d5ff;
+  text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+.resource-yield-widget[data-tier="250"] .yield-belt-icon {
+  color: #c084fc;
 }
 
 /* 3-Column Solid Minerals Grid */
@@ -1646,6 +1689,10 @@ html, body {
     width: 360px;
     max-width: calc(100vw - 28px);
     right: 14px;
+  }
+  .oc-step-btn {
+    padding: 2px 4px;
+    font-size: 9.5px;
   }
 }
 

@@ -538,19 +538,25 @@ export class UIManager {
     };
     const purityText = purityLabels[yieldData.purity] || yieldData.purity.toUpperCase();
 
+    const segmentedHtml = `
+      <div class="yield-oc-segmented" id="yield-oc-segmented" role="radiogroup" aria-label="Cadence de surcadençage">
+        <button type="button" class="oc-step-btn active" data-clock="100" title="Cadence standard (100%) • 0 éclat">100%</button>
+        <button type="button" class="oc-step-btn" data-clock="150" title="Surcadençage 150% • 1 éclat ⚡">150%</button>
+        <button type="button" class="oc-step-btn" data-clock="200" title="Surcadençage 200% • 2 éclats ⚡⚡">200%</button>
+        <button type="button" class="oc-step-btn" data-clock="250" title="Surcadençage 250% • 3 éclats ⚡⚡⚡">250%</button>
+      </div>
+    `;
+
     if (yieldData.type === 'solid') {
       return `
-        <div class="resource-yield-widget" id="resource-yield-widget" data-overclock="false">
+        <div class="resource-yield-widget" id="resource-yield-widget" data-clock="100" data-tier="100">
           <div class="yield-widget-header">
             <div class="yield-widget-title">
               <span class="yield-icon">⛏️</span>
-              <span class="yield-label">Rendement d'extraction</span>
+              <span class="yield-label">Rendement</span>
               <span class="yield-purity-pill purity-${yieldData.purity}">${purityText}</span>
             </div>
-            <button type="button" class="btn-overclock-toggle" id="btn-overclock-toggle" title="Basculer entre cadence 100% et surcadençage 250%">
-              <span class="oc-badge">100%</span>
-              <span class="oc-label">Standard</span>
-            </button>
+            ${segmentedHtml}
           </div>
 
           <div class="yield-grid">
@@ -563,10 +569,10 @@ export class UIManager {
                     <span class="yield-mk-title">${t.label}</span>
                   </div>
                   <div class="yield-rate-wrap">
-                    <span class="yield-rate-value" data-rate-100="${t.rate100}" data-rate-250="${t.rate250}">${t.rate100}</span>
+                    <span class="yield-rate-value" data-base="${t.rate100}">${t.rate100}</span>
                     <span class="yield-rate-unit">/min</span>
                   </div>
-                  <div class="yield-belt-recommendation" data-rate-100="${t.rate100}" data-rate-250="${t.rate250}" title="${belt.full}">
+                  <div class="yield-belt-recommendation" data-base="${t.rate100}" title="${belt.full}">
                     <span class="yield-belt-icon">➔</span>
                     <span class="yield-belt-text">${belt.name}</span>
                   </div>
@@ -582,28 +588,25 @@ export class UIManager {
       const icon = yieldData.fluidType === 'oil' ? '🛢️' : (yieldData.fluidType === 'water' ? '💧' : '💨');
       const pipe = this.getRecommendedPipe(yieldData.baseRate);
       return `
-        <div class="resource-yield-widget" id="resource-yield-widget" data-overclock="false">
+        <div class="resource-yield-widget" id="resource-yield-widget" data-clock="100" data-tier="100">
           <div class="yield-widget-header">
             <div class="yield-widget-title">
               <span class="yield-icon">${icon}</span>
-              <span class="yield-label">Débit d'extraction</span>
+              <span class="yield-label">Débit</span>
               <span class="yield-purity-pill purity-${yieldData.purity}">${purityText}</span>
             </div>
-            <button type="button" class="btn-overclock-toggle" id="btn-overclock-toggle" title="Basculer entre cadence 100% et surcadençage 250%">
-              <span class="oc-badge">100%</span>
-              <span class="oc-label">Standard</span>
-            </button>
+            ${segmentedHtml}
           </div>
 
           <div class="yield-fluid-box">
             <div class="yield-fluid-main">
               <div class="yield-fluid-extractor">${yieldData.extractorName}</div>
               <div class="yield-rate-wrap yield-fluid-rate">
-                <span class="yield-rate-value" data-rate-100="${yieldData.baseRate}" data-rate-250="${yieldData.overclockRate}">${yieldData.baseRate}</span>
+                <span class="yield-rate-value" data-base="${yieldData.baseRate}">${yieldData.baseRate}</span>
                 <span class="yield-rate-unit">${yieldData.unit}</span>
               </div>
             </div>
-            <div class="yield-belt-recommendation yield-pipe-rec" data-rate-100="${yieldData.baseRate}" data-rate-250="${yieldData.overclockRate}" title="${pipe.full}">
+            <div class="yield-belt-recommendation yield-pipe-rec" data-base="${yieldData.baseRate}" title="${pipe.full}">
               <span class="yield-belt-icon">➔</span>
               <span class="yield-belt-text">${pipe.name}</span>
             </div>
@@ -641,29 +644,30 @@ export class UIManager {
   }
 
   setupOverclockToggle() {
-    const btn = document.getElementById('btn-overclock-toggle');
+    const segmented = document.getElementById('yield-oc-segmented');
     const widget = document.getElementById('resource-yield-widget');
-    if (!btn || !widget) return;
+    if (!segmented || !widget) return;
 
-    btn.addEventListener('click', () => {
-      const isOC = widget.dataset.overclock === 'true';
-      const newOC = !isOC;
-      widget.dataset.overclock = String(newOC);
-      widget.classList.toggle('overclocked', newOC);
+    const clockTiers = [100, 150, 200, 250];
 
-      // Update button label and badge
-      const badge = btn.querySelector('.oc-badge');
-      const label = btn.querySelector('.oc-label');
-      if (badge && label) {
-        badge.textContent = newOC ? '250%' : '100%';
-        label.textContent = newOC ? '3 Éclats ⚡' : 'Standard';
-      }
+    const applyClock = (clock) => {
+      const multiplier = clock / 100;
+      widget.dataset.clock = String(clock);
+      widget.dataset.tier = String(clock);
+      widget.classList.toggle('overclocked', clock > 100);
 
-      // Update rate values
+      // Update active button state
+      segmented.querySelectorAll('.oc-step-btn').forEach(btn => {
+        const btnClock = Number(btn.getAttribute('data-clock'));
+        btn.classList.toggle('active', btnClock === clock);
+      });
+
+      // Update rate values with pop micro-animation
       widget.querySelectorAll('.yield-rate-value').forEach(el => {
-        const val = newOC ? el.dataset.rate250 : el.dataset.rate100;
-        if (val) {
-          el.textContent = val;
+        const base = Number(el.getAttribute('data-base'));
+        if (!isNaN(base)) {
+          const currentRate = Math.round(base * multiplier);
+          el.textContent = String(currentRate);
           el.style.transform = 'scale(1.18)';
           setTimeout(() => { el.style.transform = ''; }, 160);
         }
@@ -671,18 +675,39 @@ export class UIManager {
 
       // Update conveyor/pipeline recommendations
       widget.querySelectorAll('.yield-belt-recommendation').forEach(el => {
-        const rate = Number(newOC ? el.dataset.rate250 : el.dataset.rate100);
-        const textEl = el.querySelector('.yield-belt-text');
-        if (textEl) {
-          if (el.classList.contains('yield-pipe-rec')) {
-            const pipe = this.getRecommendedPipe(rate);
-            textEl.textContent = pipe.name;
-            el.title = pipe.full;
-          } else {
-            const belt = this.getRecommendedBelt(rate);
-            textEl.textContent = belt.name;
-            el.title = belt.full;
+        const base = Number(el.getAttribute('data-base'));
+        if (!isNaN(base)) {
+          const currentRate = Math.round(base * multiplier);
+          const textEl = el.querySelector('.yield-belt-text');
+          if (textEl) {
+            if (el.classList.contains('yield-pipe-rec')) {
+              const pipe = this.getRecommendedPipe(currentRate);
+              textEl.textContent = pipe.name;
+              el.title = pipe.full;
+            } else {
+              const belt = this.getRecommendedBelt(currentRate);
+              textEl.textContent = belt.name;
+              el.title = belt.full;
+            }
           }
+        }
+      });
+    };
+
+    // Attach click listener to each button
+    segmented.querySelectorAll('.oc-step-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const clickedClock = Number(btn.getAttribute('data-clock'));
+        const currentClock = Number(widget.dataset.clock || 100);
+
+        // If clicking already active button, cycle to next tier!
+        if (clickedClock === currentClock) {
+          const currentIndex = clockTiers.indexOf(currentClock);
+          const nextClock = clockTiers[(currentIndex + 1) % clockTiers.length];
+          applyClock(nextClock);
+        } else {
+          applyClock(clickedClock);
         }
       });
     });
